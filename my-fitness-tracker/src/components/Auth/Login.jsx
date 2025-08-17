@@ -52,7 +52,7 @@ const Login = () => {
                             type="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                            className="mt-1 text-black block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                             placeholder="any password"
                         />
                     </div>
