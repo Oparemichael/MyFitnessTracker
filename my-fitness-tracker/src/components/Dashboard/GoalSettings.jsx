@@ -103,7 +103,7 @@ const GoalSetting = () => {
                 name="dailySteps"
                 value={goals.dailySteps}
                 onChange={handleGoalChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full text-black p-2 border border-gray-300 rounded-md"
                 min="1000"
                 step="500"
               />
@@ -120,7 +120,7 @@ const GoalSetting = () => {
               name="weeklyWorkouts"
               value={goals.weeklyWorkouts}
               onChange={handleGoalChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full text-black p-2 border border-gray-300 rounded-md"
               min="1"
               max="14"
             />
@@ -136,7 +136,7 @@ const GoalSetting = () => {
                 name="monthlyWeightLoss"
                 value={goals.monthlyWeightLoss}
                 onChange={handleGoalChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full text-black p-2 border border-gray-300 rounded-md"
                 min="0.5"
                 step="0.5"
               />
@@ -154,7 +154,7 @@ const GoalSetting = () => {
                 name="waterIntake"
                 value={goals.waterIntake}
                 onChange={handleGoalChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full text-black p-2 border border-gray-300 rounded-md"
                 min="4"
                 max="20"
               />
