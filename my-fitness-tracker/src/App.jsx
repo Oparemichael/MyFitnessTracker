@@ -19,10 +19,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route element={<PrivateRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="*" element={<NotFound />} /> {/* Should be last */}
+          </Route>
+</Routes>
         </main>
         <Footer />
       </Router>
@@ -31,3 +31,4 @@ function App() {
 }
 
 export default App;
+// src/App.jsx

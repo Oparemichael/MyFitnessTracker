@@ -1,18 +1,23 @@
+// src/contexts/AuthContext.jsx
 import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Initialize from localStorage if available
+    const storedAuth = localStorage.getItem('isAuthenticated');
+    return storedAuth ? { isAuthenticated: true } : null;
+  });
 
-  const login = (email, password) => {
-    // In a real app, you would verify credentials with a backend
-    setUser({ email });
-    return true;
+  const login = () => {
+    setUser({ isAuthenticated: true });
+    localStorage.setItem('isAuthenticated', 'true');
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('isAuthenticated');
   };
 
   return (
