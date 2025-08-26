@@ -6,29 +6,29 @@ const Navbar = () => {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-blue-600">FitnessTracker</span>
+              <span className="text-xl font-bold text-blue-600 mt-5 ">FitnessTracker</span>
             </Link>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 mt-5">
             {user ? (
               <>
-                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600">
+                <Link to="/dashboard" className="text-black hover:text-blue-600">
                   Dashboard
                 </Link>
                 <button
                   onClick={logout}
-                  className="text-gray-700 hover:text-blue-600"
+                  className="text-black hover:text-blue-600"
                 >
                   Logout
                 </button>
               </>
             ) : (
-              <Link to="/login" className="text-gray-700 hover:text-blue-600">
+              <Link to="/login" className="text-black hover:text-blue-600">
                 Login
               </Link>
             )}
