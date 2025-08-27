@@ -1,13 +1,16 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/Auth/PrivateRoute';
 import Home from './pages/Home';
 import Login from './components/Auth/Login';
 import Dashboard from './components/Dashboard';
-import NotFound from './Pages/Notfound';
+import NotFound from './pages/NotFound';
 import Navbar from './components/Shared/Navbar';
 import Footer from './components/Shared/Footer';
+import SignUp from './components/Auth/SignUp';
+import ExerciseExplorer from './pages/ExerciseExplorer';
+import ExerciseDetails from './pages/ExerciseDetails';
+
 
 function App() {
   return (
@@ -16,13 +19,21 @@ function App() {
         <Navbar />
         <main className="min-h-screen">
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} /> 
+            
+            {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<NotFound />} /> {/* Should be last */}
-          </Route>
-</Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/exercises" element={<ExerciseExplorer />} /> 
+              <Route path="/exercises/:id" element={<ExerciseDetails />} />  
+            </Route>
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </main>
         <Footer />
       </Router>
@@ -31,4 +42,3 @@ function App() {
 }
 
 export default App;
-// src/App.jsx

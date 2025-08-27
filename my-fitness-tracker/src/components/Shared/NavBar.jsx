@@ -1,4 +1,3 @@
-// src/components/Shared/Navbar.jsx
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -7,18 +6,32 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
+          {/* Brand */}
           <div className="flex">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-blue-600 mt-5 ">FitnessTracker</span>
+              <span className="text-xl font-bold text-blue-600 mt-5">
+                FitnessTracker
+              </span>
             </Link>
           </div>
+
+          {/* Links */}
           <div className="flex items-center space-x-4 mt-5">
             {user ? (
               <>
-                <Link to="/dashboard" className="text-black hover:text-blue-600">
+                <Link
+                  to="/dashboard"
+                  className="text-black hover:text-blue-600"
+                >
                   Dashboard
+                </Link>
+                <Link
+                  to="/exercises"
+                  className="text-black hover:text-blue-600"
+                >
+                  Exercise Explorer
                 </Link>
                 <button
                   onClick={logout}

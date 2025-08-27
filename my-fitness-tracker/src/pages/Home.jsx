@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
 
   const handleDemoAccess = () => {
     login(); // Set authentication state
@@ -16,14 +16,14 @@ const Home = () => {
   };
 
   const handleSignUp = () => {
-    navigate('/signup');
+    navigate('/signup'); // Fixed: Now navigates to signup page
   };
 
   return (
-    <div className="min-h-screen bg-[url(https://www.deabyday.tv/.imaging/default/article/guides/sport-e-fitness/allenarsi/Meno-grasso--pi--muscoli--il-circuito-autunnale---parte-seconda/imageOriginal.jpg)] bg-cover bg-center from-blue-50 to-gray-100 w-screen flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 w-screen flex items-center justify-center">
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-blue-950 sm:text-5xl md:text-6xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
             <span className="block">Welcome to</span>
             <span className="block text-blue-600">My Fitness Tracker</span>
           </h1>

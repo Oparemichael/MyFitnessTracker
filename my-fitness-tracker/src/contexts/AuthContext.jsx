@@ -5,23 +5,29 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Initialize from localStorage if available
-    const storedAuth = localStorage.getItem('isAuthenticated');
-    return storedAuth ? { isAuthenticated: true } : null;
+    const storedAuth = localStorage.getItem('user');
+    return storedAuth ? JSON.parse(storedAuth) : null;
   });
 
-  const login = () => {
-    setUser({ isAuthenticated: true });
-    localStorage.setItem('isAuthenticated', 'true');
+  const login = (username) => {
+    const newUser = { isAuthenticated: true, username };
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('user');
+  };
+
+  const signUp = (userData) => {
+    const newUser = { isAuthenticated: true, ...userData };
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, signUp }}>
       {children}
     </AuthContext.Provider>
   );
