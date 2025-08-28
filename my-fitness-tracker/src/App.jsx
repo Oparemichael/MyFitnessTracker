@@ -10,6 +10,9 @@ import Footer from './components/Shared/Footer';
 import SignUp from './components/Auth/SignUp';
 import ExerciseExplorer from './pages/ExerciseExplorer';
 import ExerciseDetails from './pages/ExerciseDetails';
+import WorkoutLog from './pages/WorkoutLog';
+import ProgressPage from './pages/Progresspage';
+import WorkoutHistory from './pages/WorkoutHistory';
 
 
 function App() {
@@ -28,7 +31,11 @@ function App() {
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/exercises" element={<ExerciseExplorer />} /> 
-              <Route path="/exercises/:id" element={<ExerciseDetails />} />  
+              <Route path="/exercises/:id" element={<ExerciseDetails />} />
+              <Route path="/log-workout" element={<WorkoutLog />} />
+              <Route path="/Progrss" element={<ProgressPage />} />
+              <Route path="/workout-history" element={<WorkoutHistory />} />
+  
             </Route>
             
             {/* Catch-all route */}
