@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -32,6 +32,13 @@ const Navbar = () => {
                   className="text-black hover:text-blue-600"
                 >
                   Exercise Explorer
+                </Link>
+                {/* Profile button */}
+                <Link
+                  to="/profile"
+                  className="text-black hover:text-blue-600"
+                >
+                  Profile
                 </Link>
                 <button
                   onClick={logout}

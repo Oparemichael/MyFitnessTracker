@@ -9,6 +9,9 @@ export default function ExerciseExplorer() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Fetch all exercise translations in English (with caching)
   useEffect(() => {
     const fetchExercises = async () => {
@@ -52,24 +55,58 @@ export default function ExerciseExplorer() {
     fetchExercises();
   }, []);
 
-  // Pagination logic
+  // ✅ Filtered exercises based on search
+  const filteredExercises = exercises.filter((ex) =>
+    ex.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination logic (applied on filtered results)
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentExercises = exercises.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(exercises.length / itemsPerPage);
+  const currentExercises = filteredExercises.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredExercises.length / itemsPerPage);
 
   const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const saveExercise = (exercise) => {
+  const stored = JSON.parse(localStorage.getItem("savedExercises")) || [];
+  const exists = stored.find((ex) => ex.id === exercise.id);
+  if (!exists) {
+    const updated = [...stored, exercise];
+    localStorage.setItem("savedExercises", JSON.stringify(updated));
+    alert(`${exercise.name} saved to profile!`);
+  } else {
+    alert(`${exercise.name} is already saved.`);
+  }
+};
+
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Exercise Explorer</h1>
 
+      {/* ✅ Search bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search exercises..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
       {loading && <p>Loading exercises...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && currentExercises.length === 0 && (
-        <p>No English exercises found.</p>
+        <p>No matching exercises found.</p>
       )}
 
       <ul className="space-y-4">
@@ -83,12 +120,20 @@ export default function ExerciseExplorer() {
               className="text-gray-700 text-sm mt-2"
               dangerouslySetInnerHTML={{ __html: ex.description }}
             />
+            <button
+              onClick={() => saveExercise(ex)}
+              className="mt-2 px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600">
+              Save to Profile
+            </button>
           </li>
+          
         ))}
       </ul>
+      
+
 
       {/* Pagination controls */}
-      {exercises.length > itemsPerPage && (
+      {filteredExercises.length > itemsPerPage && (
         <div className="flex justify-center items-center space-x-4 mt-6">
           <button
             onClick={prevPage}

@@ -13,6 +13,7 @@ import ExerciseDetails from './pages/ExerciseDetails';
 import WorkoutLog from './pages/WorkoutLog';
 import ProgressPage from './pages/Progresspage';
 import WorkoutHistory from './pages/WorkoutHistory';
+import Profile from './pages/ProfilePage';
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
               <Route path="/log-workout" element={<WorkoutLog />} />
               <Route path="/Progrss" element={<ProgressPage />} />
               <Route path="/workout-history" element={<WorkoutHistory />} />
+              <Route path="/profile" element={<Profile />} />
   
             </Route>
             
