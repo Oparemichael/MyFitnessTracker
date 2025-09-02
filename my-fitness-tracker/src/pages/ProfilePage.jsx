@@ -2,45 +2,114 @@ import React, { useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const [savedExercises, setSavedExercises] = useState([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
+  const [profilePic, setProfilePic] = useState(null);
 
-  // Load saved exercises and user from localStorage on mount
+  // Load user and exercises from localStorage
   useEffect(() => {
-    const storedExercises = localStorage.getItem("savedExercises");
-    if (storedExercises) {
-      setSavedExercises(JSON.parse(storedExercises));
-    }
-
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const storedExercises = localStorage.getItem("savedExercises");
+    if (storedExercises) setSavedExercises(JSON.parse(storedExercises));
   }, []);
 
-  // Remove an exercise from profile
-  const removeExercise = (id) => {
-    const updated = savedExercises.filter((ex) => ex.id !== id);
-    setSavedExercises(updated);
-    localStorage.setItem("savedExercises", JSON.stringify(updated));
+  // Save updates to localStorage
+  const updateUser = (updated) => {
+    setUser(updated);
+    localStorage.setItem("user", JSON.stringify(updated));
+  };
+
+  // Handle profile picture upload
+  const handlePicUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setProfilePic(reader.result);
+        updateUser({ ...user, profilePic: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // BMI Calculation
+  const calculateBMI = (height, weight) => {
+    if (!height || !weight) return null;
+    const h = height / 100; // cm → m
+    return (weight / (h * h)).toFixed(1);
+  };
+
+  const getBMICategory = (bmi) => {
+    if (!bmi) return "Unknown";
+    if (bmi < 18.5) return "Underweight";
+    if (bmi < 25) return "Normal";
+    if (bmi < 30) return "Overweight";
+    return "Obese";
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-7x1 mx-auto">
       {/* User Info */}
-      <div className="bg-white w-screen shadow-md rounded-2xl p-6 mb-8">
-        <h1 className="text-2xl font-bold mb-2">My Profile</h1>
-        {user ? (
-          <>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">
-                {user?.firstName 
-                ? `Welcome, ${user.firstName}! 🎉` 
-                : 'Welcome to your Dashboard 🎉'}
-            </h1>
-            <p className="text-gray-500 text-sm">Email: {user.email}</p>
-          </>
-        ) : (
-          <p className="text-gray-600">No user data found. Please log in.</p>
-        )}
+      <div className="bg-white shadow-md rounded-2xl p-6 mb-8 flex justify-between items-center">
+        {/* Left side (editable user info) */}
+        <div>
+          <h1 className="text-2xl font-bold mb-2">My Profile</h1>
+          <p className="text-gray-600">
+            Welcome back, <span className="font-semibold">{user.firstname}</span> 👋
+          </p>
+          <p className="text-gray-500 text-sm">Email: {user?.email}</p>
+
+          {/* Editable Height */}
+          <div className="mt-2">
+            <label className="text-sm text-gray-600">Height (cm):</label>
+            <input
+              type="number"
+              value={user?.height || ""}
+              onChange={(e) => updateUser({ ...user, height: e.target.value })}
+              className="ml-2 border rounded-lg p-1 w-24 text-sm"
+            />
+          </div>
+
+          {/* Editable Weight */}
+          <div className="mt-2">
+            <label className="text-sm text-gray-600">Weight (kg):</label>
+            <input
+              type="number"
+              value={user?.weight || ""}
+              onChange={(e) => updateUser({ ...user, weight: e.target.value })}
+              className="ml-2 border rounded-lg p-1 w-24 text-sm"
+            />
+          </div>
+
+          {/* BMI */}
+          <p className="mt-2 text-gray-700 font-semibold">
+            BMI: {calculateBMI(user?.height, user?.weight)} (
+            {getBMICategory(calculateBMI(user?.height, user?.weight))})
+          </p>
+        </div>
+
+        {/* Right side (profile picture) */}
+        <div className="flex flex-col items-center">
+          <img
+            src={
+              profilePic ||
+              user?.profilePic ||
+              "https://via.placeholder.com/150?text=Profile+Picture"
+            }
+            alt="Profile"
+            className="w-32 h-32 rounded-full object-cover border shadow"
+          />
+          <label className="mt-3 cursor-pointer text-blue-600 text-sm">
+            Change Picture
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePicUpload}
+            />
+          </label>
+        </div>
       </div>
 
       {/* Saved Exercises */}
@@ -66,7 +135,16 @@ export default function ProfilePage() {
                   />
                 </div>
                 <button
-                  onClick={() => removeExercise(ex.id)}
+                  onClick={() => {
+                    const updated = savedExercises.filter(
+                      (e) => e.id !== ex.id
+                    );
+                    setSavedExercises(updated);
+                    localStorage.setItem(
+                      "savedExercises",
+                      JSON.stringify(updated)
+                    );
+                  }}
                   className="ml-4 px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
                 >
                   Remove
