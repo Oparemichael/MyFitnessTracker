@@ -11,10 +11,10 @@ import SignUp from './components/Auth/SignUp';
 import ExerciseExplorer from './pages/ExerciseExplorer';
 import ExerciseDetails from './pages/ExerciseDetails';
 import WorkoutLog from './pages/WorkoutLog';
-import ProgressPage from './pages/Progresspage';
+import ProgressDashboard from './pages/ProgressDashboard';
 import WorkoutHistory from './pages/WorkoutHistory';
 import Profile from './pages/ProfilePage';
-
+import WorkoutSession from './pages/WorkoutSession';
 
 function App() {
   return (
@@ -26,20 +26,20 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} /> 
-            
+            <Route path="/signup" element={<SignUp />} />
+
             {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/exercises" element={<ExerciseExplorer />} /> 
+              <Route path="/log" element={<WorkoutLog />} />
+              <Route path="/history" element={<WorkoutHistory />} />
+              <Route path="/progress" element={<ProgressDashboard />} />
+              <Route path="/exercises" element={<ExerciseExplorer />} />
               <Route path="/exercises/:id" element={<ExerciseDetails />} />
-              <Route path="/log-workout" element={<WorkoutLog />} />
-              <Route path="/Progrss" element={<ProgressPage />} />
-              <Route path="/workout-history" element={<WorkoutHistory />} />
               <Route path="/profile" element={<Profile />} />
-  
+              <Route path="/workout-session" element={<WorkoutSession />} />"
             </Route>
-            
+
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>

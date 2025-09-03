@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import DOMPurify from "dompurify";
 
 export default function ExerciseExplorer() {
   const [exercises, setExercises] = useState([]);
@@ -12,7 +13,7 @@ export default function ExerciseExplorer() {
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch all exercise translations in English (with caching)
+  // ✅ Fetch all exercise translations in English (with caching)
   useEffect(() => {
     const fetchExercises = async () => {
       setLoading(true);
@@ -74,25 +75,72 @@ export default function ExerciseExplorer() {
     setCurrentPage(1);
   }, [searchTerm]);
 
+  // ✅ Save favorite exercise
   const saveExercise = (exercise) => {
-  const stored = JSON.parse(localStorage.getItem("savedExercises")) || [];
-  const exists = stored.find((ex) => ex.id === exercise.id);
-  if (!exists) {
-    const updated = [...stored, exercise];
-    localStorage.setItem("savedExercises", JSON.stringify(updated));
-    alert(`${exercise.name} saved to profile!`);
-  } else {
-    alert(`${exercise.name} is already saved.`);
-  }
-};
+    const stored = JSON.parse(localStorage.getItem("savedExercises")) || [];
+    const exists = stored.find((ex) => ex.id === exercise.id);
+    if (!exists) {
+      const updated = [...stored, exercise];
+      localStorage.setItem("savedExercises", JSON.stringify(updated));
+      alert(`${exercise.name} saved to profile!`);
+    } else {
+      alert(`${exercise.name} is already saved.`);
+    }
+  };
 
+  // ✅ Add exercise to today's workout
+  const addToWorkout = (exercise) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const stored = JSON.parse(localStorage.getItem("workouts")) || [];
+
+    // Find if today's workout already exists
+    let todayWorkout = stored.find((w) => w.date === today);
+
+    if (todayWorkout) {
+      // Avoid duplicates
+      const exists = todayWorkout.exercises.find((ex) => ex.id === exercise.id);
+      if (!exists) {
+        todayWorkout.exercises.push({
+          id: exercise.id,
+          name: exercise.name,
+          sets: 3,
+          reps: 10,
+          weight: 0,
+        });
+      } else {
+        alert(`${exercise.name} is already in today's workout.`);
+        return;
+      }
+    } else {
+      // Create a new workout entry
+      todayWorkout = {
+        id: Date.now(),
+        date: today,
+        category: "custom",
+        exercises: [
+          {
+            id: exercise.id,
+            name: exercise.name,
+            sets: 3,
+            reps: 10,
+            weight: 0,
+          },
+        ],
+      };
+      stored.push(todayWorkout);
+    }
+
+    localStorage.setItem("workouts", JSON.stringify(stored));
+    alert(`${exercise.name} added to today's workout!`);
+  };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Exercise Explorer</h1>
+      <h1 className="text-2xl font-bold mb-1">Explore Our Workouts</h1>
+      <p>Choose the workouts that you are interested in. Seek medical advice from a experts</p>
 
       {/* ✅ Search bar */}
-      <div className="mb-6">
+      <div className="mb-6 mt-6">
         <input
           type="text"
           placeholder="Search exercises..."
@@ -118,19 +166,27 @@ export default function ExerciseExplorer() {
             <h3 className="font-semibold text-lg">{ex.name || "Unnamed Exercise"}</h3>
             <p
               className="text-gray-700 text-sm mt-2"
-              dangerouslySetInnerHTML={{ __html: ex.description }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(ex.description || "No description"),
+              }}
             />
-            <button
-              onClick={() => saveExercise(ex)}
-              className="mt-2 px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600">
-              Save to Profile
-            </button>
+            <div className="mt-2 flex gap-2">
+              <button
+                onClick={() => saveExercise(ex)}
+                className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                Add to favourite
+              </button>
+              <button
+                onClick={() => addToWorkout(ex)}
+                className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Add to Workout
+              </button>
+            </div>
           </li>
-          
         ))}
       </ul>
-      
-
 
       {/* Pagination controls */}
       {filteredExercises.length > itemsPerPage && (

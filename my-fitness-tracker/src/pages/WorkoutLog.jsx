@@ -1,169 +1,168 @@
-import { useState, useEffect } from "react";
-import { fetchExercisesByMuscle } from "../services/fitnessApi";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const WorkoutLog = () => {
-  const [exercises, setExercises] = useState([]);
-  const [workout, setWorkout] = useState({
-    exercise: "",
-    sets: "",
-    reps: "",
-    weight: "",
-  });
-  const [workouts, setWorkouts] = useState([]);
+export default function WorkoutLog() {
+  const navigate = useNavigate();
 
-  // Load saved workouts from localStorage
+  const [todayWorkout, setTodayWorkout] = useState(null);
+
+  // Load today's workout safely
   useEffect(() => {
-    const savedWorkouts = JSON.parse(localStorage.getItem("workouts")) || [];
-    setWorkouts(savedWorkouts);
-  }, []);
-
-  // Save workouts whenever they change
-  useEffect(() => {
-    localStorage.setItem("workouts", JSON.stringify(workouts));
-  }, [workouts]);
-
-  // (Optional) fetch a default set of exercises (e.g. chest) to populate dropdown
-  useEffect(() => {
-    const loadExercises = async () => {
-      try {
-        const data = await fetchExercisesByMuscle(1); // 1 = chest as example
-        setExercises(data.results || []);
-      } catch (err) {
-        console.error("Error fetching exercises:", err);
-      }
-    };
-    loadExercises();
-  }, []);
-
-  // Handle form input changes
-  const handleChange = (e) => {
-    setWorkout({ ...workout, [e.target.name]: e.target.value });
-  };
-
-  // Save workout entry
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!workout.exercise || !workout.sets || !workout.reps) {
-      alert("Please fill in exercise, sets, and reps.");
-      return;
+    let stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem("workouts")) || [];
+    } catch (err) {
+      console.error("Failed to parse workouts from localStorage", err);
     }
 
-    const newWorkout = {
-      ...workout,
-      id: Date.now(),
-      timestamp: new Date().toISOString(),
-    };
+    const today = new Date().toISOString().split("T")[0];
+    const found = stored.find((w) => w.date === today);
 
-    setWorkouts([newWorkout, ...workouts]);
-    setWorkout({ exercise: "", sets: "", reps: "", weight: "" });
+    if (found) {
+      setTodayWorkout(found);
+    } else {
+      setTodayWorkout({
+        id: Date.now(),
+        date: today,
+        category: "custom",
+        exercises: [],
+      });
+    }
+  }, []);
+
+  // Handle input change for sets/reps/weight
+  const handleChange = (exIndex, field, value) => {
+    if (!todayWorkout) return;
+    const updated = { ...todayWorkout };
+    updated.exercises[exIndex][field] = Number(value) || 0;
+    setTodayWorkout(updated);
   };
 
+  // Save updated workout
+  const saveWorkout = () => {
+    if (!todayWorkout) return;
+    let stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem("workouts")) || [];
+    } catch {
+      stored = [];
+    }
+
+    const index = stored.findIndex((w) => w.date === todayWorkout.date);
+    if (index >= 0) stored[index] = todayWorkout;
+    else stored.push(todayWorkout);
+
+    localStorage.setItem("workouts", JSON.stringify(stored));
+    alert("Workout saved!");
+  };
+
+  // Delete workout for today
+  const deleteWorkout = () => {
+    let stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem("workouts")) || [];
+    } catch {
+      stored = [];
+    }
+
+    // remove today's workout
+    stored = stored.filter((w) => w.date !== todayWorkout.date);
+    localStorage.setItem("workouts", JSON.stringify(stored));
+
+    setTodayWorkout(null);
+    alert("Workout deleted!");
+  };
+
+  const startWorkout = () => {
+    navigate("/workout-session");
+  };
+
+  if (!todayWorkout) return <p>Loading...</p>;
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Log Workout</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Workout Log</h1>
+      <p className="mb-4 text-gray-600">Date: {todayWorkout.date}</p>
 
-        {/* Workout Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-xl shadow-md space-y-4"
-        >
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Exercise
-            </label>
-            <select
-              name="exercise"
-              value={workout.exercise}
-              onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2 text-sm"
+      {todayWorkout.exercises.length === 0 ? (
+        <p className="text-gray-500">
+          No exercises yet. Add some from the Exercise Explorer.
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {todayWorkout.exercises.map((ex, index) => (
+            <div
+              key={ex.id || index}
+              className="p-4 border rounded-lg shadow-sm bg-white"
             >
-              <option value="">Select exercise...</option>
-              {exercises.map((ex) => (
-                <option key={ex.id} value={ex.name}>
-                  {ex.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Sets
-              </label>
-              <input
-                type="number"
-                name="sets"
-                value={workout.sets}
-                onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2 text-sm"
-              />
+              <h3 className="font-semibold text-lg">{ex.name}</h3>
+              <div className="grid grid-cols-3 gap-4 mt-2">
+                <div>
+                  <label className="block text-sm">Sets</label>
+                  <input
+                    type="number"
+                    value={ex.sets || ""}
+                    min="1"
+                    onChange={(e) =>
+                      handleChange(index, "sets", e.target.value)
+                    }
+                    className="w-full p-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm">Reps</label>
+                  <input
+                    type="number"
+                    value={ex.reps || ""}
+                    min="1"
+                    onChange={(e) =>
+                      handleChange(index, "reps", e.target.value)
+                    }
+                    className="w-full p-1 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm">Weight (kg)</label>
+                  <input
+                    type="number"
+                    value={ex.weight || ""}
+                    min="0"
+                    onChange={(e) =>
+                      handleChange(index, "weight", e.target.value)
+                    }
+                    className="w-full p-1 border rounded"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Reps
-              </label>
-              <input
-                type="number"
-                name="reps"
-                value={workout.reps}
-                onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Weight (kg)
-              </label>
-              <input
-                type="number"
-                name="weight"
-                value={workout.weight}
-                onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-          >
-            Save Workout
-          </button>
-        </form>
-
-        {/* Workout History Preview */}
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Recent Workouts</h2>
-          {workouts.length === 0 ? (
-            <p className="text-gray-500">No workouts logged yet.</p>
-          ) : (
-            <ul className="space-y-3">
-              {workouts.map((w) => (
-                <li
-                  key={w.id}
-                  className="bg-white p-4 rounded-lg shadow flex justify-between"
-                >
-                  <div>
-                    <p className="font-medium">{w.exercise}</p>
-                    <p className="text-sm text-gray-600">
-                      {w.sets} sets × {w.reps} reps @ {w.weight || 0} kg
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {new Date(w.timestamp).toLocaleString()}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
+          ))}
         </div>
+      )}
+
+      <div className="flex space-x-4 mt-6">
+        <button
+          onClick={saveWorkout}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Save Workout
+        </button>
+
+        {todayWorkout.exercises.length > 0 && (
+          <button
+            onClick={startWorkout}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            Start Workout
+          </button>
+        )}
+
+        <button
+          onClick={deleteWorkout}
+          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+        >
+          Delete Workout
+        </button>
       </div>
     </div>
   );
-};
-
-export default WorkoutLog;
+}

@@ -1,55 +1,80 @@
-// src/pages/WorkoutHistory.jsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const WorkoutHistory = () => {
+export default function WorkoutHistory() {
   const [workouts, setWorkouts] = useState([]);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("workouts")) || [];
-    // Sort workouts by date (newest first)
-    const sorted = stored.sort((a, b) => new Date(b.date) - new Date(a.date));
-    setWorkouts(sorted);
+    loadWorkouts();
   }, []);
 
+  const loadWorkouts = () => {
+    const stored = JSON.parse(localStorage.getItem("workouts")) || [];
+    // sort by most recent first
+    const sorted = stored.sort((a, b) => new Date(b.date) - new Date(a.date));
+    setWorkouts(sorted);
+  };
+
+  const deleteWorkout = (id) => {
+    let stored = JSON.parse(localStorage.getItem("workouts")) || [];
+    stored = stored.filter((w) => w.id !== id); // remove by id
+    localStorage.setItem("workouts", JSON.stringify(stored));
+    setWorkouts(stored);
+  };
+
+  if (workouts.length === 0) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Workout History</h1>
+        <p className="text-gray-500">No workouts logged yet.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center p-6">
-      <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Workout History</h1>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Workout History</h1>
 
-        {workouts.length === 0 ? (
-          <p className="text-gray-500">No workouts logged yet. Start logging your workouts!</p>
-        ) : (
-          <div className="space-y-6">
-            {workouts.map((workout, index) => (
-              <div
-                key={index}
-                className="border rounded-lg p-4 hover:shadow-md transition"
+      <div className="space-y-6">
+        {workouts.map((workout) => (
+          <div
+            key={workout.id}
+            className="p-6 bg-white rounded-xl shadow-md border"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold">
+                {workout.date}{" "}
+                <span className="text-gray-500 text-sm">
+                  ({workout.category})
+                </span>
+              </h2>
+              <button
+                onClick={() => deleteWorkout(workout.id)}
+                className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
               >
-                {/* Workout Date */}
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                  {new Date(workout.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </h2>
+                Delete
+              </button>
+            </div>
 
-                {/* Exercises */}
-                <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
-                  {workout.exercises?.map((ex, i) => (
-                    <li key={i}>
-                      <span className="font-semibold">{ex.name}</span> – {ex.sets} sets × {ex.reps} reps @ {ex.weight}kg
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {workout.exercises && workout.exercises.length > 0 ? (
+              <ul className="space-y-2">
+                {workout.exercises.map((ex, index) => (
+                  <li
+                    key={index}
+                    className="p-3 border rounded-md bg-gray-50 text-sm flex justify-between"
+                  >
+                    <span className="font-medium">{ex.name}</span>
+                    <span>
+                      {ex.sets || 0} x {ex.reps || 0} @ {ex.weight || 0}kg
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 text-sm">No exercises logged.</p>
+            )}
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
-};
-
-export default WorkoutHistory;
+}

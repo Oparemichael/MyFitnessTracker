@@ -2,9 +2,11 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import useForm from "../../hooks/useForm";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // auto-login after signup
 
   const { values, handleChange, resetForm } = useForm({
     firstName: "",
@@ -19,16 +21,28 @@ export default function SignUp() {
     e.preventDefault();
 
     const heightMeters = values.height / 100;
-    const bmi = values.weight / (heightMeters * heightMeters);
+    const bmi = heightMeters > 0 ? values.weight / (heightMeters * heightMeters) : 0;
 
     const userData = {
       ...values,
       bmi: bmi.toFixed(1),
     };
 
-    localStorage.setItem("user", JSON.stringify(userData));
+    // Save multiple users
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+    const exists = storedUsers.find((u) => u.email === values.email);
+    if (exists) {
+      alert("User with this email already exists.");
+      return;
+    }
+    storedUsers.push(userData);
+    localStorage.setItem("users", JSON.stringify(storedUsers));
+
+    // Auto-login
+    login(userData);
+
     resetForm();
-    navigate("/profile");
+    navigate("/dashboard");
   };
 
   return (
@@ -79,6 +93,7 @@ export default function SignUp() {
             placeholder="Password"
             value={values.password}
             onChange={handleChange}
+            minLength="6"
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             required
           />
@@ -90,6 +105,8 @@ export default function SignUp() {
               placeholder="Height (cm)"
               value={values.height}
               onChange={handleChange}
+              min="50"
+              max="300"
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
@@ -99,6 +116,8 @@ export default function SignUp() {
               placeholder="Weight (kg)"
               value={values.weight}
               onChange={handleChange}
+              min="20"
+              max="500"
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
@@ -112,7 +131,6 @@ export default function SignUp() {
           </button>
         </form>
 
-        {/* Login link */}
         <p className="text-center text-gray-600 mt-6">
           Already have an account?{" "}
           <Link

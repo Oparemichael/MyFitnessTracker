@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
   const [savedExercises, setSavedExercises] = useState([]);
   const [user, setUser] = useState({});
   const [profilePic, setProfilePic] = useState(null);
+
+  const navigate =  useNavigate();
 
   // Load user and exercises from localStorage
   useEffect(() => {
@@ -114,12 +117,18 @@ export default function ProfilePage() {
 
       {/* Saved Exercises */}
       <div className="bg-white shadow-md rounded-2xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Saved Exercises</h2>
+        <h2 className="text-xl font-semibold mb-4">Favourites</h2>
 
         {savedExercises.length === 0 ? (
+        <div>
           <p className="text-gray-500">
-            No saved exercises yet. Go explore and save some!
+            No saved exercises yet.
           </p>
+          <button
+            onClick={() => navigate("/exercises")}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            > Explore Workouts</button>
+        </div>
         ) : (
           <ul className="space-y-4">
             {savedExercises.map((ex) => (
