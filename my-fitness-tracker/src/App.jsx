@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import Login from './components/Auth/Login';
 import Dashboard from './components/Dashboard';
 import NotFound from './pages/NotFound';
-import Navbar from './components/Shared/Navbar';
+import Navbar from './components/Shared/NavBar';
 import Footer from './components/Shared/Footer';
 import SignUp from './components/Auth/SignUp';
 import ExerciseExplorer from './pages/ExerciseExplorer';
