@@ -6,7 +6,7 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const { login } = useAuth(); // auto-login after signup
+  const { signUp } = useAuth(); // auto-login after signup
 
   const { values, handleChange, resetForm } = useForm({
     firstName: "",
@@ -21,26 +21,15 @@ export default function SignUp() {
     e.preventDefault();
 
     const heightMeters = values.height / 100;
-    const bmi = heightMeters > 0 ? values.weight / (heightMeters * heightMeters) : 0;
+    const bmi =
+      heightMeters > 0 ? values.weight / (heightMeters * heightMeters) : 0;
 
     const userData = {
       ...values,
       bmi: bmi.toFixed(1),
     };
 
-    // Save multiple users
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    const exists = storedUsers.find((u) => u.email === values.email);
-    if (exists) {
-      alert("User with this email already exists.");
-      return;
-    }
-    storedUsers.push(userData);
-    localStorage.setItem("users", JSON.stringify(storedUsers));
-
-    // Auto-login
-    SignUp(userData);
-
+    signUp(userData); // handles saving & auto-login
     resetForm();
     navigate("/dashboard");
   };
