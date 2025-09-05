@@ -1,142 +1,173 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 const Login = () => {
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [error, setError] = React.useState('');
-    const navigate = useNavigate();
-    const { login } = useAuth();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-    // Validation schema using Yup
-    const validationSchema = Yup.object({
-        email: Yup.string()
-            .email('Invalid email address')
-            .required('Email is required'),
-        password: Yup.string()
-            .required('Password is required')
-    });
+  const openSignUp = (e) => {
+        navigate("/signup")
+    };
 
-    const formik = useFormik({
-        initialValues: {
-            email: '',
-            password: ''
-        },
-        validationSchema,
-        onSubmit: async (values) => {
-            setError('');
-            setIsLoading(true);
+  // Validation schema
+  const validationSchema = Yup.object({
+    email: Yup.string().email('Invalid email address').required('Email is required'),
+    password: Yup.string().required('Password is required'),
+  });
 
-            try {
-                // Demo authentication - accept any non-empty credentials
-                if (values.email.trim() && values.password.trim()) {
-                    await login(); // Set authentication state
-                    navigate('/dashboard'); // Redirect to dashboard
-                } else {
-                    setError('Please enter demo credentials');
-                }
-            } catch (err) {
-                setError('Login failed. Please try again.');
-                console.error('Login error:', err);
-            } finally {
-                setIsLoading(false);
-            }
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      setError('');
+      setIsLoading(true);
+
+      try {
+        const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+        const foundUser = storedUsers.find(
+          (u) => u.email === values.email && u.password === values.password
+        );
+
+        if (foundUser) {
+          await login(foundUser); // ✅ load full profile (with bmi, etc.)
+          navigate('/dashboard');
+        } else {
+          setError('Invalid email or password');
         }
-    });
+      } catch (err) {
+        console.error('Login error:', err);
+        setError('Login failed. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+  });
 
-    return (
-        <div className="min-h-screen w-screen flex items-center justify-center bg-[url(https://static.dw.com/image/60073158_605.jpg)] bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
-                <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                        Demo Login
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-600">
-                        Enter any email and password to access the demo dashboard
-                    </p>
-                </div>
-
-                {error && (
-                    <div className="rounded-md bg-red-50 p-4">
-                        <p className="text-sm text-red-600">{error}</p>
-                    </div>
-                )}
-
-                <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
-                    <div className="rounded-md shadow-sm space-y-4">
-                        <div>
-                            <label htmlFor="email" className="sr-only">Email address</label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                value={formik.values.email}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                className={`appearance-none relative block w-full px-3 py-3 border ${
-                                    formik.touched.email && formik.errors.email 
-                                        ? 'border-red-300' 
-                                        : 'border-gray-300'
-                                } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                                placeholder="any@example.com"
-                            />
-                            {formik.touched.email && formik.errors.email && (
-                                <p className="mt-1 text-sm text-red-600">{formik.errors.email}</p>
-                            )}
-                        </div>
-                        <div>
-                            <label htmlFor="password" className="sr-only">Password</label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                required
-                                value={formik.values.password}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                className={`appearance-none relative block w-full px-3 py-3 border ${
-                                    formik.touched.password && formik.errors.password 
-                                        ? 'border-red-300' 
-                                        : 'border-gray-300'
-                                } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                                placeholder="any-password"
-                            />
-                            {formik.touched.password && formik.errors.password && (
-                                <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={isLoading || !formik.isValid}
-                            className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                                isLoading || !formik.isValid 
-                                    ? 'bg-gray-400 cursor-not-allowed' 
-                                    : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                            } focus:outline-none`}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Signing in...
-                                </>
-                            ) : 'Sign in to Demo'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+  return (
+    <div className="min-h-screen w-screen flex items-center justify-center bg-[url(https://static.dw.com/image/60073158_605.jpg)] bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            Log In
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Enter your account credentials
+          </p>
         </div>
-    );
+
+        {error && (
+          <div className="rounded-md bg-red-50 p-4">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
+          <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              <label htmlFor="email" className="sr-only">Email address</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-3 border ${
+                  formik.touched.email && formik.errors.email
+                    ? 'border-red-300'
+                    : 'border-gray-300'
+                } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                placeholder="you@example.com"
+              />
+              {formik.touched.email && formik.errors.email && (
+                <p className="mt-1 text-sm text-red-600">{formik.errors.email}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-3 border ${
+                  formik.touched.password && formik.errors.password
+                    ? 'border-red-300'
+                    : 'border-gray-300'
+                } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                placeholder="Your password"
+              />
+              {formik.touched.password && formik.errors.password && (
+                <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading || !formik.isValid}
+              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+                isLoading || !formik.isValid
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+              } focus:outline-none`}
+            >
+              {isLoading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
+            </button>
+           
+          </div>
+        </form>
+        <p className="text-center text-gray-600 mt-6">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/signup"
+                    className="text-blue-600 font-semibold hover:underline"
+                  >
+                    Sign Up
+                  </Link>
+                </p>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

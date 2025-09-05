@@ -15,6 +15,7 @@ import ProgressDashboard from './pages/ProgressDashboard';
 import WorkoutHistory from './pages/WorkoutHistory';
 import Profile from './pages/ProfilePage';
 import WorkoutSession from './pages/WorkoutSession';
+import SettingsPage from './pages/Settings';
 
 function App() {
   return (
@@ -37,7 +38,8 @@ function App() {
               <Route path="/exercises" element={<ExerciseExplorer />} />
               <Route path="/exercises/:id" element={<ExerciseDetails />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/workout-session" element={<WorkoutSession />} />"
+              <Route path="/workout-session" element={<WorkoutSession />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
             {/* Catch-all route */}

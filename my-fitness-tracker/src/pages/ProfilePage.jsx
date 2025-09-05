@@ -19,9 +19,18 @@ export default function ProfilePage() {
 
   // Save updates to localStorage
   const updateUser = (updated) => {
-    setUser(updated);
-    localStorage.setItem("user", JSON.stringify(updated));
-  };
+  setUser(updated);
+
+  // Update current user
+  localStorage.setItem("user", JSON.stringify(updated));
+
+  // Update in users array
+  const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+  const updatedUsers = storedUsers.map((u) =>
+    u.email === updated.email ? updated : u
+  );
+  localStorage.setItem("users", JSON.stringify(updatedUsers));
+};
 
   // Handle profile picture upload
   const handlePicUpload = (e) => {
@@ -34,6 +43,10 @@ export default function ProfilePage() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const openSettings = (e) => {
+    navigate("/settings")
   };
 
   // BMI Calculation
@@ -111,6 +124,11 @@ export default function ProfilePage() {
               className="hidden"
               onChange={handlePicUpload}
             />
+            </label>
+            <label className="mt-3 cursor-pointer text-blue-600 text-sm"
+              onClick={openSettings}
+            >
+            Account Settings
           </label>
         </div>
       </div>

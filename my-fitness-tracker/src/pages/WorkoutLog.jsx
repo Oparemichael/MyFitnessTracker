@@ -85,9 +85,17 @@ export default function WorkoutLog() {
       <p className="mb-4 text-gray-600">Date: {todayWorkout.date}</p>
 
       {todayWorkout.exercises.length === 0 ? (
-        <p className="text-gray-500">
-          No exercises yet. Add some from the Exercise Explorer.
-        </p>
+        <div>
+          <p className="text-gray-500">
+            No exercises yet. Add some from the Exercise Explorer.
+          </p>
+          <button
+            onClick={() => navigate("/exercises")}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          > 
+            Explore Workouts
+          </button>
+        </div>
       ) : (
         <div className="space-y-4">
           {todayWorkout.exercises.map((ex, index) => (
@@ -136,10 +144,7 @@ export default function WorkoutLog() {
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      <div className="flex space-x-4 mt-6">
+          <div className="flex space-x-4 mt-6">
         <button
           onClick={saveWorkout}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -163,6 +168,8 @@ export default function WorkoutLog() {
           Delete Workout
         </button>
       </div>
+        </div>
+      )}
     </div>
   );
 }

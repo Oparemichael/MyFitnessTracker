@@ -39,7 +39,7 @@ export default function SignUp() {
     localStorage.setItem("users", JSON.stringify(storedUsers));
 
     // Auto-login
-    login(userData);
+    SignUp(userData);
 
     resetForm();
     navigate("/dashboard");
